@@ -10,6 +10,8 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch.launch_description_sources import FrontendLaunchDescriptionSource, PythonLaunchDescriptionSource
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 
 class Go2LaunchConfig:
@@ -86,6 +88,11 @@ class Go2NodeFactory:
             DeclareLaunchArgument('foxglove', default_value='true', description='Launch Foxglove Bridge'),
             DeclareLaunchArgument('joystick', default_value='true', description='Launch joystick'),
             DeclareLaunchArgument('teleop', default_value='true', description='Launch teleoperation'),
+            DeclareLaunchArgument(
+                'simu',
+                default_value='false',
+                description='Enable simulation mode (no real robot)'
+            ),
         ]
     
     def create_robot_state_nodes(self) -> List[Node]:
@@ -188,7 +195,7 @@ class Go2NodeFactory:
                 parameters=[{
                     'robot_ip': self.config.robot_ip,
                     'token': self.config.robot_token,
-                    'conn_type': self.config.conn_type
+                    'conn_type': self.config.conn_type,
                 }],
             ),
             # LiDAR processing node (new separate package)
@@ -230,6 +237,8 @@ class Go2NodeFactory:
                     'audio_quality': 'standard'
                 }],
             ),
+
+
         ]
     
     def create_teleop_nodes(self) -> List[Node]:
@@ -253,6 +262,11 @@ class Go2NodeFactory:
                 name='go2_teleop_node',
                 condition=IfCondition(with_joystick),
                 parameters=[self.config.config_paths['twist_mux']],
+            ),
+            Node(
+                package='robot_control',
+                executable='keyboard_controller',
+                name='keyboard_controller',
             ),
             # Twist multiplexer
             Node(
@@ -351,7 +365,7 @@ def generate_launch_description():
         core_nodes +
         teleop_nodes +
         visualization_nodes +
-        include_launches
+        include_launches 
     )
     
     return LaunchDescription(launch_entities)

@@ -18,6 +18,9 @@ import torch
 from torchvision.models import detection as detection_model
 from torchvision.utils import draw_bounding_boxes
 
+from rclpy.qos import QoSProfile
+from rclpy.qos import ReliabilityPolicy
+from rclpy.qos import HistoryPolicy
 Detection = collections.namedtuple("Detection", "label, bbox, score")
 
 class CocoDetectorNode(Node):
@@ -36,11 +39,18 @@ class CocoDetectorNode(Node):
         self.device = self.get_parameter('device').get_parameter_value().string_value
         self.detection_threshold = \
             self.get_parameter('detection_threshold').get_parameter_value().double_value
+        image_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1
+        )
+
         self.subscription = self.create_subscription(
             Image,
             "/camera/image_raw",
             self.listener_callback,
-            10)
+            image_qos
+        )
         self.detected_objects_publisher = \
             self.create_publisher(Detection2DArray, "detected_objects", 10)
         if self.get_parameter('publish_annotated_image').get_parameter_value().bool_value:

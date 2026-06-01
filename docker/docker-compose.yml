@@ -14,6 +14,7 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix  # X11 forwarding
       - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      - ../:/ros2_ws/src
     network_mode: "host"  # Required for ROS2 discovery and robot communication
     privileged: true  # Required for hardware access
     devices:

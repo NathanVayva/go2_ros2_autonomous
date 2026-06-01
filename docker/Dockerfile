@@ -13,7 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-rviz2 \
     software-properties-common \
     ros-humble-rmw-cyclonedds-cpp \
-    ffmpeg
+    ffmpeg\
+    ros-humble-vision-msgs \
+    nano
+
+
 
 # Install specific numpy version first
 RUN pip install 'numpy<2.0.0'
@@ -53,4 +57,5 @@ RUN sed --in-place --expression \
       '$isource "/ros2_ws/install/setup.bash"' \
       /ros_entrypoint.sh
 
-CMD ["ros2", "launch", "go2_robot_sdk", "robot.launch.py"]
+#CMD ["ros2", "launch", "go2_robot_sdk", "robot.launch.py"]
+CMD ["tail", "-f", "/dev/null"]
